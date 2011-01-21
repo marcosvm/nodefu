@@ -20,7 +20,7 @@ var fs = require('fs');
 
 var request = require('request');
 var h = {accept:'application/json', 'content-type':'application/json'};
-
+var couchServer = 'http://nodefu:secret@nodefu.couchone.com:80';
 
 var valuser
 
@@ -51,7 +51,7 @@ myapp.post('/coupon', function(req, res, next){
 	// var Nodefu = CouchClient("http://nodefu:secret@nodefu.couchone.com:80/coupons");
 	// Nodefu.save({_id: email}, function (err, doc) {sys.puts(JSON.stringify(doc));});
 
-	request({uri:'http://nodefu:secret@nodefu.couchone.com:80/coupons', method:'POST', body: JSON.stringify({_id: email}), headers:h}, function (err, response, body) {
+	request({uri:couchServer + '/coupons', method:'POST', body: JSON.stringify({_id: email}), headers:h}, function (err, response, body) {
 	});	
 
 	res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -78,7 +78,7 @@ myapp.post('/user', function(req, res, next){
 	
 		// Check to see if account exists
 		// Nodefu.get(newuser, function (err, doc) {
-		request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nodefu/' + newuser, method:'GET', headers:h}, function (err, response, body) {
+		request({uri:couchServer + '/nodefu/' + newuser, method:'GET', headers:h}, function (err, response, body) {
 			var myObject = JSON.parse(body);
 			if (myObject._id){
 				// account already registered
@@ -107,7 +107,7 @@ myapp.post('/user', function(req, res, next){
 				
 				// Save user information to database and respond to API request
 				// Nodefu.save({_id: newuser, password: md5(newpass), email: email}, function (err, doc) {sys.puts(JSON.stringify(doc));});
-				request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nodefu', method:'POST', body: JSON.stringify({_id: newuser, password: md5(newpass), email: email}), headers:h}, function (err, response, body) {
+				request({uri:couchServer + '/nodefu', method:'POST', body: JSON.stringify({_id: newuser, password: md5(newpass), email: email}), headers:h}, function (err, response, body) {
 				});	
 				
 				
@@ -140,7 +140,7 @@ myapp.get('/status', function(req, res, next){
 	// });
 	// 
 	
-	request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nextport/port', method:'GET', headers:h}, function (err, response, body) {
+	request({uri:couchServer + '/nextport/port', method:'GET', headers:h}, function (err, response, body) {
 		if (response){
 			var myObject = JSON.parse(body);
 			var appsrunning = (myObject.address - 8000).toString();
@@ -165,7 +165,7 @@ myapp.delete('/user', function(req, res, next){
 		if(user){
 			// var Nodefu = CouchClient("http://nodefu:secret@nodefu.couchone.com:80/nodefu");
 			// Nodefu.remove(user._id, function (err, doc) {sys.puts(JSON.stringify(doc));});
-			request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nodefu/' + user._id + '?rev=' +  user._rev, method:'DELETE', headers:h}, function (err, response, body) {
+			request({uri:couchServer + '/nodefu/' + user._id + '?rev=' +  user._rev, method:'DELETE', headers:h}, function (err, response, body) {
 			});	
 
 			res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -181,6 +181,7 @@ myapp.delete('/user', function(req, res, next){
 	
 	});
 });
+
 
 // Create node app 
 // curl -X POST -u "testuser:123" -d "appname=test&start=hello.js" http://api.localhost:8080/apps
@@ -198,7 +199,7 @@ myapp.post('/app', function(req, res, next){
 
 			// Check to see if node app exists
 			// Nodefu.get(appname, function (err, doc) {
-			request({uri:'http://nodefu:secret@nodefu.couchone.com:80/apps/' + appname, method:'GET', headers:h}, function (err, response, body) {
+			request({uri:couchServer + '/apps/' + appname, method:'GET', headers:h}, function (err, response, body) {
 				var myObject = JSON.parse(body);
 				if (myObject._id){
 			
@@ -210,14 +211,14 @@ myapp.post('/app', function(req, res, next){
 				} else {
 					// subdomain available - get next available port address
 					Nodeport.get('port', function (err, doc) {
-					// request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nextport/port', method:'GET', headers:h}, function (err, response, body) {
+					// request({uri:couchServer + '/nextport/port', method:'GET', headers:h}, function (err, response, body) {
 					// 	var doc = JSON.parse(body);
 					// 	sys.puts(JSON.stringify(doc));
 						
 						var appport = doc.address;
 						// increment next port address
 						Nodeport.save({_id: "port", address: appport + 1}, function (err, doc) {sys.puts(JSON.stringify(doc));});
-						// request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nextport/port?rev=' + doc._rev, method:'PUT', body: JSON.stringify({_id: "port", address: appport + 1}), headers:h}, function (err, response, body) {
+						// request({uri:couchServer + '/nextport/port?rev=' + doc._rev, method:'PUT', body: JSON.stringify({_id: "port", address: appport + 1}), headers:h}, function (err, response, body) {
 						// 	sys.puts(response);
 						// 	sys.puts(body);
 						// });	
@@ -225,7 +226,7 @@ myapp.post('/app', function(req, res, next){
 					
 						// Create the app
 						// Nodefu.save({_id: appname, start: start, port: appport, username: user._id }, function (err, doc) {
-						request({uri:'http://nodefu:secret@nodefu.couchone.com:80/apps', method:'POST', body: JSON.stringify({_id: appname, start: start, port: appport, username: user._id}), headers:h}, function (err, response, body) {
+						request({uri:couchServer + '/apps', method:'POST', body: JSON.stringify({_id: appname, start: start, port: appport, username: user._id}), headers:h}, function (err, response, body) {
 					
 					
 							sys.puts(JSON.stringify(doc));
@@ -269,7 +270,7 @@ myapp.put('/app', function(req, res, next){
 
 			// Check to see if node app exists
 			// Nodefu.get(appname, function (err, doc) {
-			request({uri:'http://nodefu:secret@nodefu.couchone.com:80/apps/' + appname, method:'GET', headers:h}, function (err, response, body) {
+			request({uri:couchServer + '/apps/' + appname, method:'GET', headers:h}, function (err, response, body) {
 				var doc = JSON.parse(body);
 				if (doc._id){
 			
@@ -279,7 +280,7 @@ myapp.put('/app', function(req, res, next){
 					// update the app
 					// Nodefu.save({start: start, port: doc.port, username: user._id }, function (err, doc) {
 					// Nodefu.save({_id: appname, start: start, port: doc.port, username: user._id }, function (err, doc) {
-					request({uri:'http://nodefu:secret@nodefu.couchone.com:80/apps/' + appname + '?rev=' + doc._rev, method:'PUT', body: JSON.stringify({_id: appname, start: start, port: doc.port, username: user._id}), headers:h}, function (err, response, body) {
+					request({uri:couchServer + '/apps/' + appname + '?rev=' + doc._rev, method:'PUT', body: JSON.stringify({_id: appname, start: start, port: doc.port, username: user._id}), headers:h}, function (err, response, body) {
 						
 						// sys.puts(JSON.stringify(response));
 						sys.puts(response);
@@ -329,12 +330,12 @@ myapp.delete('/app', function(req, res, next){
 
 			// Check if app exists and if user is the owner of the app
 			// Nodefu.get(appname, function (err, doc) {
-			request({uri:'http://nodefu:secret@nodefu.couchone.com:80/apps/' + appname, method:'GET', headers:h}, function (err, response, body) {
+			request({uri:couchServer + '/apps/' + appname, method:'GET', headers:h}, function (err, response, body) {
 				var doc = JSON.parse(body);
 			
 				if (doc && doc.username == valuser){
 					// Nodefu.remove(appname, function (err, doc) {sys.puts(JSON.stringify(doc));});
-					request({uri:'http://nodefu:secret@nodefu.couchone.com:80/apps/' + appname + '?rev=' +  doc._rev, method:'DELETE', headers:h}, function (err, response, body) {
+					request({uri:couchServer + '/apps/' + appname + '?rev=' +  doc._rev, method:'DELETE', headers:h}, function (err, response, body) {
 					});	
 				
 					res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -360,6 +361,7 @@ myapp.delete('/app', function(req, res, next){
 	
 	});
 });
+
 
 // // Status API
 // // http://chris:123@api.localhost:8080/status 
@@ -450,7 +452,7 @@ function authenticate(basicauth, callback){
 
 	// var Nodefu = CouchClient("http://nodefu:secret@nodefu.couchone.com:80/nodefu");
 	// Nodefu.get(username, function (err, doc) {
-	request({uri:'http://nodefu:secret@nodefu.couchone.com:80/nodefu/' + username, method:'GET', headers:h}, function (err, response, body) {
+	request({uri:couchServer + '/nodefu/' + username, method:'GET', headers:h}, function (err, response, body) {
 		var doc = JSON.parse(body);
 		if (doc._id){
 
